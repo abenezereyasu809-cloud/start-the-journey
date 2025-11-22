@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login — Simple Validation</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(135deg,#eef2ff 0%, #ffffff 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      margin: 0;
+    }
+    .card {
+      width: 360px;
+      max-width: 100%;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 8px 30px rgba(20,20,60,0.08);
+      padding: 20px;
+      text-align: center;
+    }
+    h1 { margin: 6px 0 18px; font-size: 20px; }
+    label { display: block; text-align: left; margin: 10px 0 6px; font-weight: 600; }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d6d9e6;
+      border-radius: 6px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+    .note { font-size: 13px; color: #666; margin-top: 6px; text-align: left; }
+    .row { margin-top: 14px; }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #2b6ef6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    button:active { transform: translateY(1px); }
+    .error {
+      color: #b71c1c;
+      font-size: 13px;
+      margin-top: 8px;
+      text-align: left;
+    }
+    .welcome {
+      display: none;
+      text-align: center;
+    }
+    .welcome img {
+      max-width: 240px;
+      width: 80%;
+      height: auto;
+      margin-top: 12px;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(20,20,60,0.08);
+    }
+    .small-link { display:block; margin-top:10px; font-size:13px; color:#444; text-decoration:underline; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div class="card" id="card">
+    <h1>Sign in</h1>
+
+    <form id="loginForm" novalidate>
+      <label for="username">Username (4 letters)</label>
+      <input
+        id="username"
+        name="username"
+        type="text"
+        placeholder="e.g. Abcd"
+        autocomplete="off"
+        required
+        minlength="4"
+        maxlength="4"
+        pattern="[A-Za-z]{4}"
+        title="Exactly 4 letters (A–Z or a–z)."
+      />
+      <div id="userError" class="error" aria-live="polite"></div>
+
+      <label for="password">Password (4 digits 1–6)</label>
+      <input
+        id="password"
+        name="password"
+        type="password"
+        placeholder="e.g. 1234"
+        required
+        minlength="4"
+        maxlength="4"
+        pattern="[1-6]{4}"
+        inputmode="numeric"
+        title="Exactly 4 digits — each digit must be 1,2,3,4,5 or 6."
+      />
+      <div id="passError" class="error" aria-live="polite"></div>
+
+      <div class="row">
+        <button type="submit">Enter</button>
+      </div>
+      <div class="note">Username must be exactly 4 letters. Password must be exactly 4 digits (each 1–6).</div>
+    </form>
+
+    <div class="welcome" id="welcome">
+      <h2 id="welcomeText">Welcome!</h2>
+      <!-- Local file path provided in the conversation -->
+      <img id="shakeImg" src="/mnt/data/36f42c46-c710-4a80-b76e-55340768128c.png" alt="Two people shaking hands" />
+      <button class="small-link" id="backBtn" type="button">Back to login</button>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const form = document.getElementById('loginForm');
+      const username = document.getElementById('username');
+      const password = document.getElementById('password');
+      const userError = document.getElementById('userError');
+      const passError = document.getElementById('passError');
+      const welcome = document.getElementById('welcome');
+      const card = document.getElementById('card');
+      const welcomeText = document.getElementById('welcomeText');
+      const backBtn = document.getElementById('backBtn');
+
+      // Helper to test patterns
+      function testPattern(el) {
+        const pat = el.getAttribute('pattern');
+        if (!pat) return true;
+        const re = new RegExp('^' + pat + '$');
+        return re.test(el.value || '');
+      }
+
+      function validate() {
+        let ok = true;
+        userError.textContent = '';
+        passError.textContent = '';
+
+        // username: exactly 4 letters
+        if (!username.value) {
+          userError.textContent = 'Username is required.';
+          ok = false;
+        } else if (username.value.length !== 4) {
+          userError.textContent = 'Username must be exactly 4 letters.';
+          ok = false;
+        } else if (!testPattern(username)) {
+          userError.textContent = 'Only letters A–Z allowed.';
+          ok = false;
+        }
+
+        // password: exactly 4 digits each between 1-6
+        if (!password.value) {
+          passError.textContent = 'Password is required.';
+          ok = false;
+        } else if (password.value.length !== 4) {
+          passError.textContent = 'Password must be exactly 4 digits.';
+          ok = false;
+        } else if (!testPattern(password)) {
+          passError.textContent = 'Each digit must be 1,2,3,4,5 or 6.';
+          ok = false;
+        }
+
+        return ok;
+      }
+
+      form.addEventListener('submit', function(e){
+        e.preventDefault(); // no backend — handle in client
+        if (validate()) {
+          // success — show welcome view
+          const name = username.value;
+          welcomeText.textContent = 'Welcome, ' + name + '!';
+          form.style.display = 'none';
+          welcome.style.display = 'block';
+        }
+      });
+
+      backBtn.addEventListener('click', function(){
+        // go back to login
+        username.value = '';
+        password.value = '';
+        userError.textContent = '';
+        passError.textContent = '';
+        welcome.style.display = 'none';
+        form.style.display = 'block';
+        username.focus();
+      });
+
+      // optional: show immediate validation feedback while typing
+      username.addEventListener('input', () => {
+        if (username.value.length > 4) username.value = username.value.slice(0,4);
+        if (username.value && !/^[A-Za-z]*$/.test(username.value)) {
+          userError.textContent = 'Only letters A–Z allowed.';
+        } else {
+          userError.textContent = '';
+        }
+      });
+      password.addEventListener('input', () => {
+        if (password.value.length > 4) password.value = password.value.slice(0,4);
+        if (password.value && !/^[1-6]*$/.test(password.value)) {
+          passError.textContent = 'Digits must be 1–6 only.';
+        } else {
+          passError.textContent = '';
+        }
+      });
+
+    })();
+  </script>
+</body>
+</html>
